@@ -1,0 +1,56 @@
+<!-- Ahora que tenemos acceso a la documentación, queremos hacer una página que al
+cargar obtenga un token de https://msn-comit.herokuapp.com/login para
+autentificarse. Esa página va a tener un botón, que al presionarse va a tener
+que buscar los mensajes existentes en https://msn-comit.herokuapp.com/mensajes y
+mostrarlos en una tabla HTML. -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>MSN Comit</title>
+  </head>
+  <body>
+    <h1>Mensajes</h1>
+    <button onclick="getMsg()">Ver mensajes</button>
+
+    <script>
+      const urlLogin = "https://msn-comit.herokuapp.com/login";
+      const urlMsg = "https://msn-comit.herokuapp.com/mensajes";
+      let token = "";
+
+      async function getToken() {
+        let resultado = await fetch(urlLogin);
+        token = await resultado.text();
+      }
+
+      async function getMsg() {
+        let resultado = await fetch(urlMsg, {
+          headers: {
+            token: token
+          }
+        });
+
+        let respuesta = await resultado.json();
+        let { mensajes } = respuesta;
+
+        let body = document.querySelector("body");
+        let table = document.createElement("table");
+
+        mensajes.forEach(msg => {
+          let fila = table.insertRow();
+
+          let cell = fila.insertCell();
+          cell.textContent = "Usuario";
+          cell.style.color = `#${msg.usuario.color_avatar}`;
+          fila.insertCell().textContent = msg.texto;
+        });
+        body.append(table);
+      }
+
+      getToken();
+    </script>
+  </body>
+</html>

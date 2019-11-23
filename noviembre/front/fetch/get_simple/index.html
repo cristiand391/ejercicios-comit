@@ -1,0 +1,27 @@
+<!-- Crear una página que cuando se le presione un botón haga un fetch de
+https://emoji-aleatorio.herokuapp.com/emoji y muestre el resultado en un alert. -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Emoji alert</title>
+  </head>
+  <body>
+    <h1>Emoji alert</h1>
+    <button onclick="alertEmoji()">Emoji</button>
+
+    <script>
+      const url = "https://emoji-aleatorio.herokuapp.com/emoji";
+
+      async function alertEmoji() {
+        let resultado = await fetch(url);
+        let emojiObj = await resultado.json();
+
+        alert(emojiObj.emoji);
+      }
+    </script>
+  </body>
+</html>

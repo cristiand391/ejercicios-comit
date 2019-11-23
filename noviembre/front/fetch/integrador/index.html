@@ -1,0 +1,113 @@
+<!-- Crear una página la cual va a tener 
+  1.un input para escribir un mensaje.
+  2.un botón para subir el mensaje.
+  3.un panel donde se vean los mensajes existentes.
+
+Alcargarse la página se deberá autentificar con
+https://msn-comit.herokuapp.com/login para recibir un token.
+
+Los mensajes existentes deben pedirse cada 10 segundos a
+https://msn-comit.herokuapp.com/mensajes. Para ejecutar una función cada cierto
+tiempo se puede usar setInterval: 
+  function mostrar_por_consola() {
+    console.log('pasaron 10 segundos')
+  }
+  
+  // 10000 milisegundos = 10 segundos
+  setInterval(mostrar_por_consola, 10000)
+
+Y al presionarse el botón se debe subir
+el mensaje escrito en el input a https://msn-comit.herokuapp.com/mensajes. -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>MSN Comit</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: sans-serif;
+        text-align: center;
+      }
+      table {
+        margin: 2rem auto;
+      }
+      table caption,
+      td {
+        padding: 1rem;
+        border: 1px solid;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🔥 MSN Comit 🔥</h1>
+    <input type="text" name="msg" id="msg" placeholder="Mensaje" />
+    <button onclick="sendMsg()">Subir mensaje</button>
+
+    <table>
+      <caption>
+        Mensajes
+      </caption>
+      <tbody></tbody>
+    </table>
+
+    <script>
+      const urlLogin = "https://msn-comit.herokuapp.com/login";
+      const urlMsg = "https://msn-comit.herokuapp.com/mensajes";
+      let token = "";
+
+      async function getToken() {
+        let resultado = await fetch(urlLogin);
+        token = await resultado.text();
+      }
+
+      async function sendMsg() {
+        let msg = document.querySelector("#msg").value;
+
+        fetch(urlMsg, {
+          method: "POST",
+          headers: {
+            token: token
+          },
+          body: msg
+        });
+
+        document.querySelector("#msg").value = "";
+      }
+
+      async function showMsg() {
+        let res = await fetch(urlMsg, {
+          headers: {
+            token: token
+          }
+        });
+
+        let { mensajes } = await res.json();
+
+        const body = document.querySelector("body");
+        const table = document.querySelector("table");
+        const tbody = document.querySelector("tbody");
+
+        if (tbody.childElementCount != 0) {
+          [...tbody.childNodes].forEach(row => row.remove());
+        }
+
+        mensajes.forEach(msg => {
+          let row = table.insertRow();
+          let cellUser = row.insertCell();
+
+          cellUser.textContent = `Usuario ${msg.usuario.color_avatar}`;
+          cellUser.style.color = `#${msg.usuario.color_avatar}`;
+
+          row.insertCell().textContent = msg.texto;
+        });
+      }
+
+      setInterval(showMsg, 10000);
+      getToken();
+    </script>
+  </body>
+</html>
